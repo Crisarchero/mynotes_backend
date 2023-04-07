@@ -15,8 +15,8 @@ const userRouter = require('./routes/users')
 const db = require('./db')
 const app = express()
 const apiPort = process.env.PORT
-
-//Some set up
+const tokenPassword = process.env.TOKENPASSWORD
+//More set up.
 const saltRounds = 10;
 
 app.use(cors())
@@ -31,7 +31,7 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'))
 
 //Login
 app.post('/users/login', (req, res) => {
-
+    //Cheking to see if the provided username exists.
     Users.findOne({
         name: req.body.name,
     })
@@ -42,7 +42,7 @@ app.post('/users/login', (req, res) => {
                         const token = jwt.sign({
                             id: user._id,
                             name: req.body.name
-                        }, 'secret')
+                        }, tokenPassword)
                         return res.json({ status: 'ok', user: token })
                     }
                     else {
@@ -130,7 +130,7 @@ function validate(req,res,next, route, router){
         if (token) {
 
             try {
-                const decode = jwt.verify(token, 'secret')
+                const decode = jwt.verify(token, tokenPassword)
                 if(decode){
 
                     app.use(route, router);
